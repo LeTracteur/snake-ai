@@ -47,13 +47,13 @@ current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 train_log_dir = 'logs/tensorboard/' + current_time + '/train'
 train_summary_writer = tf.summary.create_file_writer(train_log_dir)
 
-loss = 0
+loss = 0.0
 os.makedirs("model/best",exist_ok=True)
 for ep in range(nb_episodes):
 	env, epd, disp, step = simulate(env, agent, log_freq, ep, steps, score_list, steps_list, counter, nb_episodes, t_r, c2)
 
 	if ep > agent.batch_size:
-		agent.optimize_per()
+		loss = agent.optimize_per()
 
 	if env.score > best_score:
 		best_score = env.score
@@ -62,7 +62,7 @@ for ep in range(nb_episodes):
 
 	if ep % log_freq == 0:
 		with train_summary_writer.as_default():
-			tf.summary.scalar('loss', loss / 50, step=ep)
+			tf.summary.scalar('loss', loss , step=ep)
 			tf.summary.scalar('steps', step, step=ep)
 			tf.summary.scalar('reward', np.sum(epd['reward']), step=ep)
 			tf.summary.scalar('score', env.score, step=ep)
