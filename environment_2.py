@@ -61,55 +61,55 @@ class SnakeEnvironment_2:
 
 		self.foodx, self.foody = add_food(self.possible_x, self.possible_y, self.snake_list)
 
-		board_status = np.copy(self.states_space)
+		self.board_status = np.copy(self.states_space)
 
 		f_pos_x, f_pos_y = int(self.foodx/self.snake_size), int(self.foody/self.snake_size)
-		board_status[f_pos_y][f_pos_x] = 3.0
+		self.board_status[f_pos_y][f_pos_x] = 3.0
 
 		head_pos_x, head_pos_y = int(self.snake_head[0]/self.snake_size), int(self.snake_head[1]/self.snake_size)
-		board_status[head_pos_y][head_pos_x] = 1.0
+		self.board_status[head_pos_y][head_pos_x] = 1.0
 
 		b_pos_x = int(self.snake_list[0][0]/self.snake_size)
 		b_pos_y = int(self.snake_list[0][1]/self.snake_size)
-		board_status[b_pos_y][b_pos_x] = 2.0
+		self.board_status[b_pos_y][b_pos_x] = 2.0
 
-		# categorical_2d = keras.utils.to_categorical(np.array(board_status), num_classes=4)
+		# categorical_2d = keras.utils.to_categorical(np.array(self.board_status), num_classes=4)
 
 		self.score = 0
 		# return categorical_2d
-		# return np.expand_dims(board_status, axis=2)
-		return board_status
+		# return np.expand_dims(self.board_status, axis=2)
+		return self.board_status
 
 	def observation(self):
-		board_status = np.copy(self.states_space)
+		self.board_status = np.copy(self.states_space)
 		f_pos_x, f_pos_y = int(self.foodx / self.snake_size), int(self.foody / self.snake_size)
-		board_status[f_pos_y][f_pos_x] = 3.0
+		self.board_status[f_pos_y][f_pos_x] = 3.0
 
 		head_pos_x, head_pos_y = int(self.snake_head[0] / self.snake_size), int(self.snake_head[1] / self.snake_size)
-		board_status[head_pos_y][head_pos_x] = 1.0
+		self.board_status[head_pos_y][head_pos_x] = 1.0
 
-		# categorical_2d = keras.utils.to_categorical(np.array(board_status), num_classes=4)
+		# categorical_2d = keras.utils.to_categorical(np.array(self.board_status), num_classes=4)
 		# return categorical_2d
-		# return np.expand_dims(board_status, axis=2)
-		return board_status
+		# return np.expand_dims(self.board_status, axis=2)
+		return self.board_status
 
 	def get_state_map(self):
-		board_status = np.copy(self.states_space)
+		self.board_status = np.copy(self.states_space)
 		f_pos_x, f_pos_y = int(self.foodx / self.snake_size), int(self.foody / self.snake_size)
-		board_status[f_pos_y][f_pos_x] = 3.0
+		self.board_status[f_pos_y][f_pos_x] = 3.0
 
 		head_pos_x, head_pos_y = int(self.snake_head[0] / self.snake_size), int(self.snake_head[1] / self.snake_size)
-		if 0 <= head_pos_x < self.width / self.snake_size and 0 <= head_pos_y < self.length / self.snake_size:
-			board_status[head_pos_y][head_pos_x] = 1.0
+		if 0 <= head_pos_x < (self.width+2*self.wall_size) / self.snake_size and 0 <= head_pos_y < (self.length+2*self.wall_size) / self.snake_size:
+			self.board_status[head_pos_y][head_pos_x] = 1.0
 
 		for b in self.snake_list[:-1]:
 			pos_x, pos_y = int(b[0] / self.snake_size), int(b[1] / self.snake_size)
-			board_status[pos_y][pos_x] = 2.0
+			self.board_status[pos_y][pos_x] = 2.0
 
-		# categorical_2d = keras.utils.to_categorical(np.array(board_status), num_classes=4)
+		# categorical_2d = keras.utils.to_categorical(np.array(self.board_status), num_classes=4)
 		# return categorical_2d
-		# return np.expand_dims(board_status, axis=2)
-		return board_status
+		# return np.expand_dims(self.board_status, axis=2)
+		return self.board_status
 
 	def step(self, action):
 		terminal = False

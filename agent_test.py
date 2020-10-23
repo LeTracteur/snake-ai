@@ -1,4 +1,4 @@
-from environment import *
+from environment_2 import *
 from agents import *
 from skimage import transform
 
@@ -67,13 +67,15 @@ from skimage import transform
 #
 # plt.plot(list_plot)
 # plt.show()
-screen_width = 100
-screen_height = 100
-snake_size = 10
-env = SnakeEnvironment_2(screen_width, screen_height, snake_size)
-agent = DQNagent(4, env.states_space.shape, 5000, 32)
+wall_size = 7
 
-agent.model_policy = tf.keras.models.load_model('model/model_policy.h5')
+screen_width = 70 + 2*wall_size
+screen_height = 70 + 2*wall_size
+snake_size = 7
+env = SnakeEnvironment_2(screen_width, screen_height, snake_size, wall_size)
+agent = DQNagent(4, env.states_space.shape, 10000, 64)
+
+agent.model_policy = tf.keras.models.load_model('model/best/model_policy.h5')
 agent.update_weights()
 agent.current_eps = 0.0
 
@@ -86,6 +88,7 @@ agent.next_state_buffer.append(state)
 while not terminal:
 	env.render()
 	action = agent.act(state)
+	old_state = deepcopy(state)
 	new_state, reward, terminal = env.step(action)
 
 	state = new_state

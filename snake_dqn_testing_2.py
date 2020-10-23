@@ -1,6 +1,9 @@
 # from old.environment import *
 from environment_2 import *
 from agents import *
+import os
+import datetime
+
 
 ##############################
 # Game and Training parameters
@@ -11,6 +14,8 @@ screen_width = 70 + 2*wall_size
 screen_height = 70 + 2*wall_size
 
 snake_size = 7
+
+log_freq = 50
 
 nb_episodes = 30000
 steps = 2000
@@ -38,59 +43,31 @@ agent = DQNagent(4, env.states_space.shape, 10000, 64)
 
 agent.model_policy.summary()
 
-# state = env.observation()
-# agent.next_state_buffer.append(state)
+current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+train_log_dir = 'logs/tensorboard/' + current_time + '/train'
+train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+
 loss = 0
+os.makedirs("model/best",exist_ok=True)
 for ep in range(nb_episodes):
-	state = env.reset()
-	for _ in range(agent.tau):
-		agent.state_buffer.append(state)
-		agent.next_state_buffer.append(state)
-
-	for step in range(steps):
-		agent.update_epsilonv2(nb_episodes, 0.5)
-
-		# env.render()
-		action = agent.act(state, env.snake_list)
-		new_state, reward, terminal = env.step(action)
-
-		agent.next_state_buffer.append(new_state)
-
-		reward_list.append(reward)
-
-		t_r += reward
-		tot_reward.append(t_r)
-		# copy_s_b = np.stack(agent.state_buffer, axis=2)
-		# copy_s_n_b = np.stack(agent.next_state_buffer, axis=2)
-		agent.add_to_memory(deepcopy(agent.state_buffer), action, reward, deepcopy(agent.next_state_buffer), terminal)
-
-		if terminal:
-			score_list.append(env.score)
-			steps_list.append(step)
-			break
-
-		state = new_state
-
-		if counter > agent.batch_size:
-			# if ep % c1 == 0:
-			loss = agent.optimize_per()
-
-		if counter % c2 == 0:
-			agent.update_weights()
-
-		printProgressBar(ep * steps + step, steps * nb_episodes, agent.current_eps, t_r, env.score, loss,
-		                 prefix="Progress:")
-
-		counter += 1
+	env, epd, disp, step = simulate(env, agent, log_freq, ep, steps, score_list, steps_list, counter, nb_episodes, t_r, c2)
 
 	if ep > agent.batch_size:
 		agent.optimize_per()
-	agent.update_weights()
 
 	if env.score > best_score:
 		best_score = env.score
 		agent.save('best')
 		eps_val = agent.current_eps
+
+	if ep % log_freq == 0:
+		with train_summary_writer.as_default():
+			tf.summary.scalar('loss', loss / 50, step=ep)
+			tf.summary.scalar('steps', step, step=ep)
+			tf.summary.scalar('reward', np.sum(epd['reward']), step=ep)
+			tf.summary.scalar('score', env.score, step=ep)
+			video = np.expand_dims(np.array(disp), 0)
+			video_summary('dummy_snake', video, step=ep)
 
 
 agent.plot_loss()
