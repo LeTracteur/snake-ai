@@ -164,6 +164,7 @@ def simulate(env, agent, log_freq, ep, steps, score_list, steps_list, counter, n
             disp.append(image_to_color(env.board_status))
         action = agent.act(state, env.snake_list)
         new_state, reward, terminal = env.step(action)
+        t_r += reward
         epd = update_ep(epd, state, reward, action, terminal)
         agent.add_to_memory(deepcopy(agent.state_buffer), action, reward, deepcopy(agent.next_state_buffer), terminal)
         agent.next_state_buffer.append(new_state)
